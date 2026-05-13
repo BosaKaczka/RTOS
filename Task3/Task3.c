@@ -10,10 +10,12 @@
 #define LED1_PIN 11
 #define LED2_PIN 12
 #define BUTTON_PIN 13
+#define AUTO_CLICK 1
 
 void task_1(void *pvParameters);
 void task_2(void *pvParameters);
 void task_3(void *pvParameters);
+void fast_click(void *pvParameters); // New task for auto-clicking
 
 void init_gpio();
 void init_queue();
@@ -27,18 +29,25 @@ int main()
     init_gpio();
     init_queue();
 
-    printf("------ FreeRTOS START ------\n");
+    printf("------ START ------\n");
+
+    /* xTaskCreate parameters:
+       1. Function pointer (task_1)
+       2. Descriptive name ("task_1")
+       3. Stack size in words (256)
+       4. Parameters passed to task (NULL)
+       5. Priority (1 - Higher numbers have higher priority)
+       6. Task handle (NULL - not needed here)
+    */
 
     xTaskCreate(task_1, "task_1", 256, NULL, 1, NULL);
     xTaskCreate(task_2, "task_2", 256, NULL, 1, NULL);
     xTaskCreate(task_3, "task_3", 256, NULL, 1, NULL);
+    xTaskCreate(fast_click, "fast_click", 256, NULL, 1, NULL);
 
     vTaskStartScheduler();
 
-    while (true)
-    {
-        sleep_ms(100);
-    }
+   
 }
 
 void init_gpio()
@@ -55,6 +64,9 @@ void init_gpio()
     gpio_init(BUTTON_PIN);
     gpio_set_dir(BUTTON_PIN, GPIO_IN);
     gpio_pull_up(BUTTON_PIN);
+
+    gpio_init(AUTO_CLICK);
+    gpio_set_dir(AUTO_CLICK, GPIO_OUT);
 
     printf("GPIO initialized\n");
 }
@@ -106,7 +118,7 @@ void task_2(void *pvParameters)
 
             core_id = (uint8_t)portGET_CORE_ID();
 
-            printf("Button pressed Core ID: %d\n", core_id);
+            printf("Button pressed\n");
 
             if (xQueueSend(queue, &core_id, 0) != pdPASS)
             {
@@ -148,6 +160,18 @@ void task_3(void *pvParameters)
         }
 
         vTaskDelay(pdMS_TO_TICKS(500));
+    }
+}
+
+void fast_click(void *pvParameters)
+{
+    while (true)
+    {
+        gpio_put(AUTO_CLICK, true);
+        vTaskDelay(pdMS_TO_TICKS(33));
+
+        gpio_put(AUTO_CLICK, false);
+        vTaskDelay(pdMS_TO_TICKS(33));
     }
 }
 

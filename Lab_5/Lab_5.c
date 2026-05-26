@@ -88,7 +88,7 @@ static const btn_event_t g_btn_events[NUM_BUTTONS] = {BTN_EVENT_UP, BTN_EVENT_DO
 // Menu label table
 // ---------------------------------------------------------------------------
 static const char *g_menu_labels[SCREEN_COUNT] = {
-    "PicoToaster 3000", // Home - funny but not controversial
+    "RZUlF Mie gonji",
     "Accelerometer",
     "System Info"};
 

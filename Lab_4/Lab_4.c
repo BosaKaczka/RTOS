@@ -56,10 +56,10 @@ void init_queue()
     queue = xQueueCreate(32, sizeof(int16_t));
 }
 
-// Task 1: Akwizycja danych
+// Task 1
 void task_1(void *pvParameters)
 {
-    uint8_t config[] = {CTRL_REG1, 0x77}; // 400Hz
+    uint8_t config[] = {CTRL_REG1, 0x77};
     i2c_write_blocking(I2C_PORT, ADDRESS, config, 2, false);
 
     int16_t z_accel;
@@ -73,11 +73,11 @@ void task_1(void *pvParameters)
         z_accel = (int16_t)(data[0] | (data[1] << 8));
 
         xQueueSend(queue, &z_accel, 0);
-        vTaskDelay(pdMS_TO_TICKS(2)); // ok. 500Hz
+        vTaskDelay(pdMS_TO_TICKS(2));
     }
 }
 
-// Task 2: Data Analysis
+// Task 2
 void task_2(void *pvParameters)
 {
     int16_t received_z;
@@ -102,7 +102,6 @@ void task_2(void *pvParameters)
             last_z = received_z;
 
             TickType_t current_tick = xTaskGetTickCount();
-            // Convert gap and debounce to ticks
             TickType_t debounce_ticks = pdMS_TO_TICKS(DEBOUNCE_MS);
             TickType_t gap_ticks = pdMS_TO_TICKS(DOUBLE_TAP_GAP_MS);
 
@@ -125,20 +124,18 @@ void task_2(void *pvParameters)
                     {
                         printf("Double Tap Detected!\n");
                         gpio_put(LED0_PIN, 1);
-                        vTaskDelay(pdMS_TO_TICKS(100)); // Brief flash
+                        vTaskDelay(pdMS_TO_TICKS(100));
                         gpio_put(LED0_PIN, 0);
 
                         first_tap_detected = false;
                     }
                     else
                     {
-                        // Current tap is now the first tap of a potential new sequence
                         last_tap_tick = current_tick;
                     }
                 }
             }
 
-            // Reset if the second tap never comes
             if (first_tap_detected && (current_tick - last_tap_tick > gap_ticks))
             {
                 first_tap_detected = false;

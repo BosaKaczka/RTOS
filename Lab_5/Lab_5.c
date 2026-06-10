@@ -26,9 +26,9 @@
 #define I2C_ACCEL_SDA 6
 #define I2C_ACCEL_SCL 7
 
-#define BTN_UP_PIN 2
-#define BTN_DOWN_PIN 3
-#define BTN_OK_PIN 4
+#define BTN_UP_PIN 16
+#define BTN_DOWN_PIN 18
+#define BTN_OK_PIN 17
 
 #define LED_PIN 10
 
